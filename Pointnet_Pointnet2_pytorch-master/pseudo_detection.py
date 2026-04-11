@@ -1,5 +1,6 @@
 import os
 import sys
+import argparse
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -162,33 +163,93 @@ def visualize(points, detections=None):
     plt.show()
 
 
+def discover_input_files(input_path):
+    if os.path.isfile(input_path):
+        return [input_path]
+
+    if not os.path.isdir(input_path):
+        return []
+
+    valid_ext = ('.npy', '.txt', '.csv')
+    files = []
+    for root, _, filenames in os.walk(input_path):
+        for name in filenames:
+            if name.lower().endswith(valid_ext):
+                files.append(os.path.join(root, name))
+
+    return sorted(files)
+
+
 # ====== 主函数 ======
 def main():
-    model_path = 'log/classification/2026-04-04_21-11/checkpoints/best_model.pth'
-    data_path = 'data/modelnet40_normal_resampled/chair/chair_0001.txt'
+    parser = argparse.ArgumentParser(description='Pseudo detection for point cloud files (single or batch).')
+    parser.add_argument(
+        '--model_path',
+        default=os.path.join(BASE_DIR, 'log/classification/2026-04-04_21-11/checkpoints/best_model.pth'),
+        help='Path to trained model checkpoint.'
+    )
+    parser.add_argument(
+        '--input_path',
+        default=os.path.join(BASE_DIR, 'data/modelnet40_normal_resampled/chair/chair_0001.txt'),
+        help='Point cloud file path or directory path for batch detection.'
+    )
+    parser.add_argument(
+        '--shape_names_path',
+        default=os.path.join(BASE_DIR, 'data/modelnet40_normal_resampled/modelnet40_shape_names.txt'),
+        help='Path to class names file.'
+    )
+    parser.add_argument(
+        '--visualize',
+        action='store_true',
+        help='Visualize detection result. Recommended for single-file mode.'
+    )
+    args = parser.parse_args()
 
-    shape_names = [line.strip() for line in open(
-        'data/modelnet40_normal_resampled/modelnet40_shape_names.txt')]
+    shape_names = [line.strip() for line in open(args.shape_names_path)]
+    input_files = discover_input_files(args.input_path)
+    if len(input_files) == 0:
+        print(f"未找到可检测文件: {args.input_path}")
+        return
 
     print("加载模型...")
-    model = load_model(model_path)
+    model = load_model(args.model_path)
 
-    print("加载点云...")
-    points = load_pointcloud(data_path)
+    total_detected_files = 0
+    total_detections = 0
+    single_mode = len(input_files) == 1
 
-    print("切块...")
-    blocks = split_pointcloud(points)
-    print(f"block数量: {len(blocks)}")
+    for idx, file_path in enumerate(input_files, 1):
+        print(f"\n[{idx}/{len(input_files)}] 检测文件: {file_path}")
 
-    print("预测...")
-    detections = predict_blocks(model, blocks, shape_names)
+        print("加载点云...")
+        points = load_pointcloud(file_path)
 
-    print("检测结果:")
-    for det in detections:
-        print(det[0], det[1], det[2])
+        print("切块...")
+        blocks = split_pointcloud(points)
+        print(f"block数量: {len(blocks)}")
 
-    print("可视化...")
-    visualize(points, detections)
+        print("预测...")
+        detections = predict_blocks(model, blocks, shape_names)
+
+        if detections:
+            total_detected_files += 1
+            total_detections += len(detections)
+
+        print("检测结果:")
+        if len(detections) == 0:
+            print("无目标类别检测结果")
+        else:
+            for det in detections:
+                print(det[0], det[1], det[2])
+
+        if args.visualize and single_mode:
+            print("可视化...")
+            visualize(points, detections)
+
+    print("\n===== 批量检测完成 =====")
+    print(f"处理文件数: {len(input_files)}")
+    print(f"有检测结果文件数: {total_detected_files}")
+    print(f"总检测框数量: {total_detections}")
 
 
 if __name__ == '__main__':
