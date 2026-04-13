@@ -153,8 +153,18 @@ class ModelNetDataLoader(Dataset):
 
         if not self.use_normals:
             point_set = point_set[:, 0:3]
+        
+        # ===== 生成 bbox =====
+        xyz = point_set[:, 0:3]
 
-        return point_set, label
+        xyz_min = np.min(xyz, axis=0)
+        xyz_max = np.max(xyz, axis=0)
+
+        center = (xyz_min + xyz_max) / 2
+        size = (xyz_max - xyz_min)
+
+        bbox = np.concatenate([center, size]).astype(np.float32)
+        return point_set, label, bbox
 
     def __getitem__(self, index):
         return self._get_item(index)

@@ -1,0 +1,23 @@
+import torch
+from data_utils.ModelNetDataLoader import ModelNetDataLoader
+
+class Args:
+    num_point = 1024
+    use_uniform_sample = False
+    use_normals = False
+    num_category = 40
+
+args = Args()
+
+dataset = ModelNetDataLoader(
+    root='data/modelnet40_preprocessed',
+    args=args,
+    split='train'
+)
+
+points, label, bbox = dataset[0]
+
+print("points:", points.shape)
+print("label:", label)
+print("bbox:", bbox.shape)
+print("bbox内容:", bbox)
