@@ -1,0 +1,17 @@
+=== Noise Test ===
+sigma=0.0: IoU=0.526
+sigma=0.01: IoU=0.566
+sigma=0.02: IoU=0.536
+sigma=0.05: IoU=0.580
+
+=== Dropout Test ===
+drop=0.0: IoU=0.524
+drop=0.2: IoU=0.515
+drop=0.3: IoU=0.565
+drop=0.5: IoU=0.536
+
+=== Rotate Test ===
+angle=0: IoU=0.513
+angle=45: IoU=0.000
+angle=90: IoU=0.000
+angle=180: IoU=0.000
