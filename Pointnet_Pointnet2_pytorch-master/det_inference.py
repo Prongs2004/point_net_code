@@ -18,6 +18,7 @@ IOU_THRESH = 0.3
 
 TARGET_CLASSES = ['chair', 'table', 'sofa']
 
+ROBUST_MODE = "rotate"   # clean / noise / dropout / rotate
 
 # ===== 加载模型 =====
 def load_model(model_path):
@@ -206,8 +207,27 @@ def visualize(points, detections):
         ax.text(min_pt[0], min_pt[1], min_pt[2], f"{cls}:{score:.2f}")
 
     plt.show()
+# 鲁棒性测试
+def add_noise(points, sigma=0.02):
+    noise = np.random.normal(0, sigma, points.shape)
+    return points + noise
 
 
+def random_dropout(points, drop_rate=0.3):
+    mask = np.random.rand(len(points)) > drop_rate
+    return points[mask]
+
+
+def random_rotate(points):
+    theta = np.random.uniform(0, 2*np.pi)
+
+    rot = np.array([
+        [np.cos(theta), -np.sin(theta), 0],
+        [np.sin(theta),  np.cos(theta), 0],
+        [0, 0, 1]
+    ])
+
+    return points @ rot
 # ===== 主函数 =====
 def main():
     model_path = 'det_model.pth'
@@ -215,12 +235,36 @@ def main():
 
     shape_names = [line.strip() for line in open(
         'data/modelnet40_normal_resampled/modelnet40_shape_names.txt')]
+    
+    
 
     print("加载模型...")
     model = load_model(model_path)
 
     print("加载点云...")
+
     points = load_pointcloud(data_path)
+    gt_min = np.min(points, axis=0)
+    gt_max = np.max(points, axis=0)
+    print("GT bbox:")
+    print(gt_min, gt_max)
+
+    print("原始点数:", len(points))
+
+    if ROBUST_MODE == "noise":
+        points = add_noise(points, sigma=0.02)
+        print("加入高斯噪声")
+
+    elif ROBUST_MODE == "dropout":
+        points = random_dropout(points, drop_rate=0.3)
+        print("随机丢点")
+
+    elif ROBUST_MODE == "rotate":
+        points = random_rotate(points)
+        print("随机旋转")
+
+    else:
+        print("干净数据")
 
     print("切块...")
     blocks = split_pointcloud(points)
@@ -236,6 +280,30 @@ def main():
     print("检测结果:")
     for det in detections:
         print(det[2], det[3], det[0], det[1])
+
+    print("\n===== 评估指标 =====")
+
+    if len(detections) == 0:
+        print("漏检（没有检测到目标）")
+    else:
+        for det in detections:
+            pred_min, pred_max, cls, score = det
+
+            iou = compute_iou(
+                (pred_min, pred_max),
+                (gt_min, gt_max)
+            )
+
+            print(f"类别: {cls}")
+            print(f"置信度: {score:.4f}")
+            print(f"IoU: {iou:.4f}")
+
+    gt_center = (gt_min + gt_max) / 2
+    pred_center = (pred_min + pred_max) / 2
+
+    offset = np.linalg.norm(gt_center - pred_center)
+
+    print(f"中心偏移: {offset:.4f}")
 
     print("可视化...")
     visualize(points, detections)

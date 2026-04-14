@@ -1,0 +1,21 @@
+(pc_det) prongs@prongs-Legion-Y9000P-IAH7H:/media/prongs/Data/Graduation_Project/point_net_code-master/Pointnet_Pointnet2_pytorch-master$ python det_inference.py 
+加载模型...
+加载点云...
+GT bbox:
+[-0.4571 -0.7995 -0.5531] [0.4493 0.8322 0.4809]
+原始点数: 10000
+随机旋转
+切块...
+block数量: 12
+预测...
+NMS前数量: 2
+NMS后数量: 1
+检测结果:
+chair 0.9999808073043823 [-0.52100874 -0.64864185 -0.74067482] [0.51826488 0.75024113 0.6228756 ]
+
+===== 评估指标 =====
+类别: chair
+置信度: 1.0000
+IoU: 0.5958
+中心偏移: 0.0414
+可视化...
