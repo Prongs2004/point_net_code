@@ -19,7 +19,7 @@ from det_inference import (
 )
 
 # ===== 参数 =====
-MODEL_PATH = 'det_model.pth'
+MODEL_PATH = 'det_model_best.pth'
 DATA_PATH = 'data/modelnet40_normal_resampled/chair/chair_0001.txt'
 
 CONF_LIST_NOISE = [0.0, 0.01, 0.02, 0.05]
