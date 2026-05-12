@@ -24,7 +24,7 @@ DATA_PATH = 'data/modelnet40_normal_resampled/chair/chair_0001.txt'
 
 CONF_LIST_NOISE = [0.0, 0.01, 0.02, 0.05]
 CONF_LIST_DROPOUT = [0.0, 0.2, 0.3, 0.5]
-CONF_LIST_ROTATE = [0, 45, 90, 180]
+CONF_LIST_ROTATE = [0, 5, 10, 15]
 
 
 # ===== 扰动函数 =====

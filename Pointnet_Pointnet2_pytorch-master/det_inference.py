@@ -16,7 +16,7 @@ BLOCK_SIZE = 1.0
 CONF_THRESH = 0.8
 IOU_THRESH = 0.3
 
-TARGET_CLASSES = ['chair', 'table', 'sofa']
+TARGET_CLASSES = ['chair']
 
 ROBUST_MODE = "rotate"   # clean / noise / dropout / rotate
 
@@ -219,7 +219,7 @@ def random_dropout(points, drop_rate=0.3):
 
 
 def random_rotate(points):
-    theta = np.random.uniform(0, 2*np.pi)
+    theta = np.random.uniform(-np.pi/6, np.pi/6)
 
     rot = np.array([
         [np.cos(theta), -np.sin(theta), 0],
@@ -230,7 +230,7 @@ def random_rotate(points):
     return points @ rot
 # ===== 主函数 =====
 def main():
-    model_path = 'det_model.pth'
+    model_path = 'det_model_best.pth'
     data_path = 'data/modelnet40_normal_resampled/chair/chair_0001.txt'
 
     shape_names = [line.strip() for line in open(

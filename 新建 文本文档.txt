@@ -1,0 +1,2 @@
+epochs1, train1, test1 = parse_log('Pointnet_Pointnet2_pytorch-master/log/classification/2026-04-18_23-13/logs/pointnet_cls.txt')
+epochs2, train2, test2 = parse_log('Pointnet_Pointnet2_pytorch-master/log/det/train_2026-04-18_23-02-15.log')

@@ -16,7 +16,7 @@ BATCH_SIZE = 16
 EPOCHS = 200
 LR = 0.001
 NUM_CLASS = 40          # ModelNet40
-DATA_ROOT = 'data/modelnet40_normal_resampled'  # 你的数据集路径
+DATA_ROOT = 'data/modelnet40_gpu_preprocess'  # 你的数据集路径
 
 # ===== 损失 =====
 cls_loss_fn = nn.CrossEntropyLoss()
